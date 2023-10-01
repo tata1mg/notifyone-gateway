@@ -1,0 +1,43 @@
+{
+  "NAME": "ns_gateway",
+  "HTTP_VERSION": "1.0.0",
+  "HOST": "0.0.0.0",
+  "PORT": 6561,
+  "WORKERS": 1,
+  "DEBUG": true,
+  "NOTIFICATION_SERVICE": {
+    "HOST": "",
+    "TIMEOUT": 5
+  },
+  "APM": {
+    "SERVER_URL": "http://10.1.2.118:8200",
+    "ENVIRONMENT": "staging",
+    "ENABLED": false,
+    "SECRET_TOKEN": "",
+    "SERVER_TIMEOUT": "30s",
+    "SPAN_FRAMES_MIN_DURATION": "10ms",
+    "TRANSACTION_SAMPLE_RATE": 0.1
+  },
+  "TRIGGER_NOTIFICATIONS": {
+    "SQS": {
+      "SQS_REGION": "ap-south-1",
+      "SQS_MAX_CONNECTIONS": 20,
+      "SQS_ENDPOINT_URL": ""
+    },
+    "CRITICAL_PRIORITY": {
+      "HOST": "http://notification_core.{{ env_name }}.svc.{{ domain }}"
+    },
+    "HIGH_PRIORITY": {
+      "QUEUE_NAME": "stag-ns_high_priority_event_notification"
+    },
+    "MEDIUM_PRIORITY": {
+      "QUEUE_NAME": "stag-ns_high_priority_event_notification"
+    },
+    "LOW_PRIORITY": {
+      "QUEUE_NAME": "stag-ns_high_priority_event_notification"
+    }
+  },
+  "SENTRY": {
+    "DSN": ""
+  }
+}

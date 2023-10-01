@@ -1,0 +1,14 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+torpedo = {editable = true, ref = "1.0.0", git = "ssh://git@github.com/tata1mg/torpedo.git"}
+commonutils = {editable = true, ref = "1.0.0", git = "ssh://git@github.com/tata1mg/commonutils.git"}
+
+
+[dev-packages]
+
+[requires]
+python_version = "3.9.10"
