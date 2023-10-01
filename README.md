@@ -66,7 +66,7 @@ Once you are done with the service setup, the API documentation can be accessed 
 Example - If you started your service at port number 9402, the documentation can be accessed at - **localhost:9401/swagger**
 
 #### **Alternatively,**
-If you wish to have a look at the API documentation without deploying the service, you can use an independent swagger UI to view the documentation by pointing the swagger UI to the [swagger.json](https://github.com/tata1mg/notifyone-gateway/blob/master/api_doc.json) file.
+If you wish to have a look at the API documentation without deploying the service, you can use an independent swagger UI to view the documentation by pointing the swagger UI to the [api_doc.json](https://github.com/tata1mg/notifyone-gateway/blob/master/api_doc.json) file.
 
 Or, import the [api_doc.json](https://github.com/tata1mg/notifyone-gateway/blob/master/api_doc.json) file into Postman as OAS3 API collection.
 
