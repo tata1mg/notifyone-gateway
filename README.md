@@ -51,12 +51,13 @@ Gateway acts as the single point of contact in the [NotifyOne](https://github.co
     7. python3 -m pipenv install
     8. python3 -m app.service
 #### Docker container based deployment
+###### Here, we pre-assume that you have got docker installed on you system and it's up and running 
     1. git clone https://github.com/tata1mg/notifyone-gateway.git
     2. cd notifyone-gateway
     3. touch config.json
     4. Generate actual keys and values for config.json file. Refer to config_template.json for keys.
     5. docker build . --tag notifyone-gateway --build-arg SERVICE_NAME=notifyone_gateway
-    6. docker run notifyone-gateway
+    6. docker run -p <service-host-port>:<service-container-port> --name notifyone-gateway --detach notifyone-gateway
 
 ## API Document
 We have used [sanic_openapi](https://pypi.org/project/sanic-openapi/) to automatically generate the OAS3 specification API documents for the APIs exposed in this service.
@@ -66,9 +67,9 @@ Once you are done with the service setup, the API documentation can be accessed 
 Example - If you started your service at port number 9402, the documentation can be accessed at - **localhost:9401/swagger**
 
 #### **Alternatively,**
-If you wish to have a look at the API documentation without deploying the service, you can use an independent swagger UI to view the documentation by pointing the swagger UI to the [api_doc.json](https://github.com/tata1mg/notifyone-gateway/blob/master/api_doc.json) file.
+If you wish to have a look at the API documentation without deploying the service, you can use an independent swagger UI to view the documentation by pointing the swagger UI to the [api_doc.json](https://raw.githubusercontent.com/tata1mg/notifyone-gateway/master/api_doc.json) file.
 
-Or, import the [api_doc.json](https://github.com/tata1mg/notifyone-gateway/blob/master/api_doc.json) file into Postman as OAS3 API collection.
+Or, import the [api_doc.json](https://raw.githubusercontent.com/tata1mg/notifyone-gateway/master/api_doc.json) file into Postman as OAS3 API collection.
 
 
 

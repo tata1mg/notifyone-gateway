@@ -86,7 +86,7 @@ class EventNotification:
 
     @classmethod
     async def trigger_event_notification(cls, payload: dict):
-        event_id = payload['event_id']
+        event_id = str(payload['event_id'])
         event = await Notifications.get_event(event_id)
         if not event:
             raise BadRequestException(ErrorMessages.EVENT_NOT_CONFIGURED.value)

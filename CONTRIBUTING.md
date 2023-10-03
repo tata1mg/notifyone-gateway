@@ -17,14 +17,14 @@
 
 ## Code of Conduct
 
-Please review our [Code of Conduct](https://github.com/tata1mg/notifyone-handler/blob/master/CODE_OF_CONDUCT.md). It is in effect at all times. We expect it to be honored by everyone who contributes to this project.
+Please review our [Code of Conduct](https://github.com/tata1mg/notifyone-gateway/blob/master/CODE_OF_CONDUCT.md). It is in effect at all times. We expect it to be honored by everyone who contributes to this project.
 
 ## Asking Questions, Discussing ideas
 
-Please use [GitHub Discussion](https://github.com/tata1mg/notifyone-handler/discussions) to discuss the ideas and ask questions.
+Please use [GitHub Discussion](https://github.com/tata1mg/notifyone-gateway/discussions) to discuss the ideas and ask questions.
 
 ## Opening an Issue
-Please use [GitHub Issues](https://github.com/tata1mg/notifyone-handler/issues) to report issues or request a feature.
+Please use [GitHub Issues](https://github.com/tata1mg/notifyone-gateway/issues) to report issues or request a feature.
 
 Before [creating an issue](https://help.github.com/en/github/managing-your-work-on-github/creating-an-issue), check if you are using the latest version of the project. If you are not up-to-date, see if updating fixes your issue first.
 
