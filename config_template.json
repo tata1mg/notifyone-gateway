@@ -2,11 +2,11 @@
   "NAME": "ns_gateway",
   "HTTP_VERSION": "1.0.0",
   "HOST": "0.0.0.0",
-  "PORT": 6561,
+  "PORT": 9401,
   "WORKERS": 1,
   "DEBUG": true,
   "NOTIFICATION_SERVICE": {
-    "HOST": "",
+    "HOST": "http://localhost:9402",
     "TIMEOUT": 5
   },
   "APM": {
