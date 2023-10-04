@@ -22,7 +22,9 @@
     "SQS": {
       "SQS_REGION": "eu-west-2",
       "SQS_MAX_CONNECTIONS": 20,
-      "SQS_ENDPOINT_URL": "http://localhost:4566"
+      "SQS_ENDPOINT_URL": "http://localhost:4566",
+      "AWS_ACCESS_KEY_ID": "",
+      "AWS_SECRET_ACCESS_KEY": ""
     },
     "CRITICAL_PRIORITY": {
       "HOST": "http://localhost:9402"
