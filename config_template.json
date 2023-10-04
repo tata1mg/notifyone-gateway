@@ -20,21 +20,21 @@
   },
   "TRIGGER_NOTIFICATIONS": {
     "SQS": {
-      "SQS_REGION": "ap-south-1",
+      "SQS_REGION": "eu-west-2",
       "SQS_MAX_CONNECTIONS": 20,
-      "SQS_ENDPOINT_URL": ""
+      "SQS_ENDPOINT_URL": "http://localhost:4566"
     },
     "CRITICAL_PRIORITY": {
-      "HOST": "http://notification_core.{{ env_name }}.svc.{{ domain }}"
+      "HOST": "http://localhost:9402"
     },
     "HIGH_PRIORITY": {
       "QUEUE_NAME": "stag-ns_high_priority_event_notification"
     },
     "MEDIUM_PRIORITY": {
-      "QUEUE_NAME": "stag-ns_high_priority_event_notification"
+      "QUEUE_NAME": "stag-ns_medium_priority_event_notification"
     },
     "LOW_PRIORITY": {
-      "QUEUE_NAME": "stag-ns_high_priority_event_notification"
+      "QUEUE_NAME": "stag-ns_low_priority_event_notification"
     }
   },
   "SENTRY": {

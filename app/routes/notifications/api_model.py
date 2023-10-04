@@ -84,7 +84,7 @@ class SendNotificationApiModel(BaseApiModel):
     class RequestBodyOpenApiModel:
         event_id = openapi.Integer(example=25, description="Event ID for this notification")
         source_identifier = openapi.String(example="ID1212122", description="Source identifier sent with the request")
-        to = ToOpenApiModel,
+        to = ToOpenApiModel
         channels = ChannelsOpenApiModel
         attachments = openapi.Array(File, required=False, descriptions="List of files to be attached with the email/whatsapp")
         body = openapi.Dict
