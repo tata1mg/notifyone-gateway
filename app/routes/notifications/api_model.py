@@ -6,7 +6,7 @@ from app.routes.base_api_model import BaseApiModel, File
 
 class ToOpenApiModel:
     email = openapi.Array(openapi.String(), desciption="List of email ids, required for email", required=False, example=["abc@gmail.com"])
-    mobile = openapi.Array(openapi.String(), desciption="List of 10 digit mobile numbers, required for sms/whatsapp", required=False, example=["7827XXXX89"])
+    mobile = openapi.Array(openapi.String(), desciption="List of 10 digit mobile numbers, required for sms/whatsapp", required=False, example=["6000000000"])
     device = openapi.Array(openapi.String(), desciption="List of device registration ids (FCM), required for push notification", required=False, example=["device-id-1"])
 
 
@@ -50,6 +50,13 @@ class SendNotificationApiResponseDataOpenApiModel:
     processing_type = openapi.String(description="Processing type used for this request. It can SYNC or ASYNC", example="ASYNC")
 
 
+class SendNotificationApiRequestBodyOrderOpenApiModel:
+    order_id = openapi.String(example="PO21212121")
+
+class SendNotificationApiRequestBodyOpenApiModel:
+    order = SendNotificationApiRequestBodyOrderOpenApiModel
+
+
 class GetNotificationApiModel(BaseApiModel):
 
     _uri = "/get-notification"
@@ -87,7 +94,7 @@ class SendNotificationApiModel(BaseApiModel):
         to = ToOpenApiModel
         channels = ChannelsOpenApiModel
         attachments = openapi.Array(File, required=False, descriptions="List of files to be attached with the email/whatsapp")
-        body = openapi.Dict
+        body = SendNotificationApiRequestBodyOpenApiModel
 
     class ResponseBodyOpenApiModel:
         data = SendNotificationApiResponseDataOpenApiModel
