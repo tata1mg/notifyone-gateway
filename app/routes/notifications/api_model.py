@@ -5,9 +5,9 @@ from app.routes.base_api_model import BaseApiModel, File
 
 
 class ToOpenApiModel:
-    email = openapi.Array(openapi.String(), desciption="List of email ids, required for email", required=False)
-    mobile = openapi.Array(openapi.String(), desciption="List of 10 digit mobile numbers, required for sms/whatsapp", required=False)
-    device = openapi.Array(openapi.String(), desciption="List of device registration ids (FCM), required for push notification", required=False)
+    email = openapi.Array(openapi.String(), desciption="List of email ids, required for email", required=False, example=["abc@gmail.com"])
+    mobile = openapi.Array(openapi.String(), desciption="List of 10 digit mobile numbers, required for sms/whatsapp", required=False, example=["7827XXXX89"])
+    device = openapi.Array(openapi.String(), desciption="List of device registration ids (FCM), required for push notification", required=False, example=["device-id-1"])
 
 
 class SenderOpenApiModel:
@@ -82,7 +82,7 @@ class SendNotificationApiModel(BaseApiModel):
     )
 
     class RequestBodyOpenApiModel:
-        event_id = openapi.Integer(example=25, description="Event ID for this notification")
+        event_id = openapi.Integer(example=1, description="Event ID for this notification")
         source_identifier = openapi.String(example="ID1212122", description="Source identifier sent with the request")
         to = ToOpenApiModel
         channels = ChannelsOpenApiModel
