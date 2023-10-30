@@ -20,6 +20,7 @@ notification_config = CONFIG.config["TRIGGER_NOTIFICATIONS"]
 
 
 class EventNotification:
+
     HANDLERS: Dict[EventPriority, Publisher]
 
     @classmethod

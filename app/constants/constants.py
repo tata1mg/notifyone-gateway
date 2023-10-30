@@ -1,3 +1,3 @@
 class PrepareNotification:
-    ENDPOINT = "/v4/prepare-notification"
+    ENDPOINT = "/prepare-notification"
     METHOD = "POST"
