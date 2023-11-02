@@ -1,4 +1,6 @@
 import asyncio
+import os
+
 import pytest
 from sanic import Sanic
 from torpedo import Host, send_response
@@ -17,7 +19,6 @@ def loop():
     yield loop
     loop.close()
 
-
 @pytest.fixture(scope="session")
 def sanic_client(loop):
     """
@@ -33,6 +34,7 @@ def sanic_client(loop):
         return client
 
     yield create_client
+
     # Clean up
     if clients:
         for client in clients:
@@ -130,6 +132,7 @@ async def app():
 
     yield app
 
+
 @pytest.fixture(scope="session")
 def test_cli(loop, app, sanic_client):
     """Setup a test sanic app"""
@@ -148,5 +151,9 @@ def test_cli(loop, app, sanic_client):
     from app.constants import EventPriority
     from app.services.event_notification import EventNotification
     EventNotification.HANDLERS[EventPriority.CRITICAL]._host = "http://localhost:{}".format(_cli.port)
+
+    # Mock SQS queues
+    from tests.mock_resources.aws.mock_sqs import mock_sqs_queues
+    mock_sqs_queues(os.getcwd())
 
     return _cli

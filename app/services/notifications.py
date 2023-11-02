@@ -3,7 +3,7 @@ import copy
 import logging
 
 from app.models import Event
-from app.service_clients import NotifyOneCoreClient
+from app.service_clients import NotificationServiceClient
 
 logger = logging.getLogger()
 
@@ -53,7 +53,7 @@ class Notifications:
         Fetch app events from the downstream, format and load in-memory
         """
         app_events = cls._APP_EVENTS
-        all_events = await NotifyOneCoreClient.get_events_custom(
+        all_events = await NotificationServiceClient.get_events_custom(
             attributes=cls._event_attributes
         )
         if all_events:
@@ -68,6 +68,13 @@ class Notifications:
         return app_event_mapping
 
     @classmethod
+    async def validate_event(cls, app_name, event_name) -> bool:
+        app_events = await cls.app_events()
+        if app_name in app_events and event_name in app_events[app_name]:
+            return True
+        return False
+
+    @classmethod
     async def get_event(cls, event_id:str) -> Event:
         event = None
         app_events = await cls.app_events()
@@ -77,4 +84,4 @@ class Notifications:
 
     @classmethod
     async def get_event_notification(cls, notification_request_id):
-        return await NotifyOneCoreClient.get_sent_notifications_by_notification_request_id(notification_request_id)
+        return await NotificationServiceClient.get_sent_notifications_by_notification_request_id(notification_request_id)
