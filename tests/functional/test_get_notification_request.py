@@ -1,7 +1,4 @@
-import datetime
-
 import pytest
-
 
 
 class TestGetNotification:

@@ -9,6 +9,9 @@ from app.routes import blueprint_group
 from app.listeners import listeners
 from pytest_sanic.utils import TestClient
 
+from app.constants import EventPriority
+from app.services.event_notification import EventNotification
+
 
 @pytest.fixture(scope="session")
 def loop():
@@ -18,6 +21,7 @@ def loop():
     loop = asyncio.get_event_loop()
     yield loop
     loop.close()
+
 
 @pytest.fixture(scope="session")
 def sanic_client(loop):
@@ -37,8 +41,8 @@ def sanic_client(loop):
 
     # Clean up
     if clients:
-        for client in clients:
-            loop.run_until_complete(client.close())
+        for cli in clients:
+            loop.run_until_complete(cli.close())
 
 
 @pytest.fixture(scope="session")
@@ -124,9 +128,7 @@ async def app():
         if request_data["source_identifier"] == "raise_500":
             raise HTTPRequestException("Intentional 500 error raised")
         data = {
-            "channels": {
-
-            }
+            "channels": {}
         }
         return send_response(data=data)
 
@@ -137,7 +139,7 @@ async def app():
 def test_cli(loop, app, sanic_client):
     """Setup a test sanic app"""
     Host._listeners = listeners
-    _cli = Host.test_setup(
+    client = Host.test_setup(
         loop,
         sanic_client,
         "app.service_clients",
@@ -146,14 +148,11 @@ def test_cli(loop, app, sanic_client):
         gen_schemas=False,
         db_config=None
     )
-
     # Update host for critical priority publisher
-    from app.constants import EventPriority
-    from app.services.event_notification import EventNotification
-    EventNotification.HANDLERS[EventPriority.CRITICAL]._host = "http://localhost:{}".format(_cli.port)
+    EventNotification.HANDLERS[EventPriority.CRITICAL]._host = "http://localhost:{}".format(client.port)
 
     # Mock SQS queues
     from tests.mock_resources.aws.mock_sqs import mock_sqs_queues
     mock_sqs_queues(os.getcwd())
 
-    return _cli
+    return client
