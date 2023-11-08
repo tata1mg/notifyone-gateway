@@ -1,3 +1,3 @@
-__all__ = ["NotificationServiceClient"]
+__all__ = ["NotifyOneCoreClient"]
 
-from .notification_service import NotificationServiceClient
+from .notifyone_core import NotifyOneCoreClient

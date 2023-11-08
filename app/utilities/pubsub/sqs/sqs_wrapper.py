@@ -12,6 +12,7 @@ from app.utilities.utils import json_dumps, json_loads
 
 
 class SQSWrapper(Publisher):
+
     PROCESSING_TYPE = ProcessingType.ASYNC
 
     def __init__(

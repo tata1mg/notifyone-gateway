@@ -1,0 +1,2 @@
+[run]
+omit = app/caches/__init__.py, app/service.py

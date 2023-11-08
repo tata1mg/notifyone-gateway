@@ -7,8 +7,8 @@ name = "pypi"
 torpedo = {editable = true, ref = "1.0.0", git = "https://github.com/tata1mg/torpedo.git"}
 commonutils = {editable = true, ref = "1.0.0", git = "https://github.com/tata1mg/commonutils.git"}
 
-
 [dev-packages]
+"moto[server]" = "*"
 
 [requires]
 python_version = "3.9.10"
