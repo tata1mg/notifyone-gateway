@@ -17,7 +17,7 @@ class MockServers:
         if cls._servers.get(cls._get_key(host, port)):
             pass
         else:
-            server = ThreadedMotoServer(ip_address="localhost", port=4566)
+            server = ThreadedMotoServer(ip_address="localhost", port=port)
             server.start()
             cls._servers[cls._get_key(host, port)] = server
 
