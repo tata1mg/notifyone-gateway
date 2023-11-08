@@ -1,3 +1,4 @@
+import boto3
 from urllib.parse import urlparse
 from tests.mock_resources.aws.moto_server import MockServers
 
@@ -23,11 +24,8 @@ def mock_sqs_queues(path:str):
     create_queue(medium_priority_queue, sqs_config["SQS_REGION"], endpoint_url)
     create_queue(low_priority_queue, sqs_config["SQS_REGION"], endpoint_url)
 
-    return
-
 
 def create_queue(name, region, endpoint_url):
-    import boto3
     sqs_resource = boto3.resource(
         "sqs",
         endpoint_url=endpoint_url,

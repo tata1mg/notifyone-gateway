@@ -84,7 +84,6 @@ class MockNotifyOneCoreApis:
             else:
                 raise HTTPRequestException("Something went wrong")
             return send_response(data=data)
-        return
 
     @classmethod
     def _mock_prepare_notifications_api(cls, app: Sanic):
@@ -97,4 +96,3 @@ class MockNotifyOneCoreApis:
                 "channels": {}
             }
             return send_response(data=data)
-        return
