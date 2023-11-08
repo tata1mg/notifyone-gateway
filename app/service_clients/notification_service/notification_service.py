@@ -3,7 +3,7 @@ from torpedo import CONFIG
 from app.service_clients.base_api_client import APIClient
 
 
-class NotifyOneCoreClient(APIClient):
+class NotificationServiceClient(APIClient):
     """
     auth service client
     """
