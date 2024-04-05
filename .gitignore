@@ -8,6 +8,11 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+alembic.ini
+config.py
+config.json
+config_test.json
+config_log.json
 build/
 develop-eggs/
 dist/
