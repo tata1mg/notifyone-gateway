@@ -8,7 +8,3 @@ def generate_uuid():
 
 def json_dumps(data):
     return json.dumps(data)
-
-
-def json_loads(data_str):
-    return json.loads(data_str)

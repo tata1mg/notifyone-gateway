@@ -1,6 +1,7 @@
 import pytest
 from app.constants import ErrorMessages
 from app.utilities import json_dumps
+from app.utilities.pubsub.sqs import SQSWrapper
 
 
 class TestSendNotification:
@@ -153,3 +154,53 @@ class TestSendNotification:
             # assert result["data"]["processing_type"] == "SYNC"
             # assert result["data"].get("request_id")
             # assert result["data"].get("message")
+
+    async def test_send_notification_large_payload(
+            self, test_cli
+    ):
+        """
+        test the send-notification endpoint for large payloads
+        """
+        data = {
+            "event_id": 103,
+            "source_identifier": "PO12121212121",
+            "to": {
+                    "email": ["abc@mail.com"],
+                    "mobile": ["7800000000"],
+                    "device": []
+                },
+            "channels": {
+                "email": {
+                    "sender": {
+                        "name": "Tata 1mg",
+                        "address": "xyz@1mg.com"
+                    },
+                    "reply_to": "string"
+                }
+            },
+            "attachments": [
+                {
+                    "url": "https://1mg-odin-production.s3.ap-south-1.amazonaws.com/upload/sales_orders/42550349/6f55151e-adb5-4171-8fe2-5eb6599eafb7.pdf",
+                    "filename": "report.pdf"
+                }
+            ],
+            "body": {
+                "order": {
+                    "order_id": "PO21212121"
+                }
+            }
+        }
+
+        counter = 0
+        while not SQSWrapper.check_if_compression_needed(json_dumps(data)):
+            counter += 1
+            for i in range(100000):
+                data['body']['order'][str(counter) + 'order_id' + str(i)] = 'PO21212121' + str(i)
+
+        response_object = await test_cli.post(
+            "/send-notification",
+            headers={"Content-Type": "application/json"},
+            data=json_dumps(data)
+        )
+        result = response_object.json()
+        assert response_object.status_code == 200
