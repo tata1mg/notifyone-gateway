@@ -8,7 +8,7 @@ from app.services.publisher import Publisher, PublishResult
 
 from commonutils import BaseSQSWrapper
 
-from app.utilities.utils import json_dumps, json_loads
+from app.utilities.utils import json_dumps
 
 
 class SQSWrapper(Publisher):
@@ -47,13 +47,7 @@ class SQSWrapper(Publisher):
         await self.init()
         attributes = attributes or dict()
         payload_json = json_dumps(payload)
-        if self.is_compression_enabled:
-            payload_json = self.compress_message(payload_json)
-            attributes['compressedMessage'] = {
-                "DataType": "String",
-                "StringValue": "yes"
-            }
-        elif self.check_if_compression_needed(payload_json):
+        if self.is_compression_enabled or self.check_if_compression_needed(payload_json):
             payload_json = self.compress_message(payload_json)
             attributes['compressedMessage'] = {
                 "DataType": "String",
@@ -87,15 +81,15 @@ class SQSWrapper(Publisher):
         encoded_msg = base64.b64encode(compressed_msg).decode("utf-8")
         return encoded_msg
 
-    def decompress_to_payload(self, compressed_msg) -> dict:
-        decompressed_msg = self.decompress_message(compressed_msg)
-        return json_loads(decompressed_msg)
-
-    @staticmethod
-    def decompress_message(compressed_msg: str):
-        decoded_msg = base64.b64decode(compressed_msg.encode('utf-8'))
-        decompressed_msg = zlib.decompress(decoded_msg).decode('utf-8')
-        return decompressed_msg
+    # def decompress_to_payload(self, compressed_msg) -> dict:
+    #     decompressed_msg = self.decompress_message(compressed_msg)
+    #     return json_loads(decompressed_msg)
+    #
+    # @staticmethod
+    # def decompress_message(compressed_msg: str):
+    #     decoded_msg = base64.b64decode(compressed_msg.encode('utf-8'))
+    #     decompressed_msg = zlib.decompress(decoded_msg).decode('utf-8')
+    #     return decompressed_msg
 
     @staticmethod
     def check_if_compression_needed(payload_json: str) -> bool:
