@@ -1,4 +1,6 @@
-FROM --platform=linux/amd64 python:3.9.10-slim
+ARG SYS_PLATFORM
+
+FROM --platform=$SYS_PLATFORM python:3.9.10-slim
 
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
