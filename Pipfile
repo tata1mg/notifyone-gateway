@@ -9,6 +9,7 @@ commonutils = {editable = true, ref = "1.0.0", git = "https://github.com/tata1mg
 
 [dev-packages]
 "moto[server]" = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.9"
