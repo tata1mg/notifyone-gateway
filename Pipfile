@@ -11,4 +11,4 @@ commonutils = {editable = true, ref = "1.0.0", git = "https://github.com/tata1mg
 "moto[server]" = "*"
 
 [requires]
-python_version = "3.9.10"
+python_version = "3.9"
