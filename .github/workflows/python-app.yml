@@ -27,6 +27,7 @@ jobs:
       run: |
         pip install pipenv==2023.12.1
         pipenv sync -d
+        pipenv shell
         pip freeze
     - name: Test with pytest
       run: |
