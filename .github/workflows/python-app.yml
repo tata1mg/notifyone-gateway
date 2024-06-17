@@ -26,9 +26,9 @@ jobs:
     - name: Install dependencies
       run: |
         pip install pipenv==2023.12.1
-        pipenv shell
         pipenv install -d
         pip freeze
     - name: Test with pytest
       run: |
+        pipenv shell
         pytest --cov app/
