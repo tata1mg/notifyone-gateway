@@ -34,4 +34,5 @@ jobs:
         cp config_template.json config.json
     - name: Test with pytest
       run: |
-        pipenv run pytest --cov app/
+        pipenv run pytest --cov=app
+        pipenv run coverage report --fail-under=90
