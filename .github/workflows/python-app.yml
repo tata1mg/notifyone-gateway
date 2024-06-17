@@ -30,5 +30,4 @@ jobs:
         pip freeze
     - name: Test with pytest
       run: |
-        pipenv shell
-        pytest --cov app/
+        pipenv run pytest --cov app/
