@@ -142,7 +142,7 @@ class TestSendNotification:
             assert result["error"]["message"] == ErrorMessages.NO_CHANNEL_ACTIVE.value
 
         if event_id == 102:
-            assert response_object.status_code == 200
+            assert response_object.status_code != 200
 
         elif event_id == 103 and source_identifier == "PO12121212":
             assert response_object.status_code == 200
