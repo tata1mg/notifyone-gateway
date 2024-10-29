@@ -16,12 +16,21 @@ RUN apt-get update && \
         git \
         gcc \
         openssh-server \
-        curl
+        curl \
+        build-essential \
+        libssl-dev \
+        libffi-dev \
+        python3-dev \
+        pkg-config
 
 RUN echo "Y" | apt-get install procps
 
 RUN pip install --user pipenv
 RUN pip install --upgrade pip
+
+# Install Rust
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Create home ubuntu service
 RUN mkdir -p /home/ubuntu/apps/$SERVICE_NAME/logs
