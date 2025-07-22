@@ -75,11 +75,19 @@ class Notifications:
         return False
 
     @classmethod
-    async def get_event(cls, event_id:str) -> Event:
+    async def get_event_by_id(cls, event_id:str) -> Event:
         event = None
         app_events = await cls.app_events()
         if event_id in app_events:
             event = Event(app_events[event_id])
+        return event
+
+    @classmethod
+    async def get_event(cls, app_name, event_name) -> Event:
+        event = None
+        app_events = await cls.app_events()
+        if app_name in app_events and event_name in app_events[app_name]:
+            event = Event(app_events[app_name][event_name])
         return event
 
     @classmethod
