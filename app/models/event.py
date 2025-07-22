@@ -19,3 +19,11 @@ class Event:
 
     def is_mobile_mandatory(self) -> bool:
         return bool(sum([self.actions.get(channel, 0) for channel in NotificationChannels.mobile_mandatory_channels()]))
+
+    def get_active_channels(self):
+        return [key for key in self.actions if self.actions[key] == 1]
+
+    @property
+    def dynamic_channel_allowed(self):
+        return self.meta_info.get("dynamic_channels", False)
+    

@@ -5,6 +5,8 @@ class ErrorMessages(CustomEnum):
     MISSING_REQUIRED_PARAMS = "missing required parameter - {}"
     INVALID_EMAIL_FORMAT = "invalid email format"
     INVALID_MOBILE_FORMAT = "invalid mobile format"
+    INVALID_EMAIL_FORMAT_IN_CC = "invalid email format in cc"
+    CC_EMAIL_SHOULD_BE_LIST = "CC emails must be provided as a list of strings"
     EMAIL_MANDATORY_FOR_EVENT = 'email is mandatory to send notificatios for this event'
     MOBILE_MANDATORY_FOR_EVENT = 'mobile is mandatory to send notificatios for this event'
     INVALID_EVENT_PRIORITY = 'invalid event priority'
@@ -14,3 +16,4 @@ class ErrorMessages(CustomEnum):
     ONLY_ONE_TO_MOBILE_SUPPORTED = "Currently, only one mobile number is supported in 'to' address"
     ONLY_ONE_TO_DEVICE_SUPPORTED = "Currently, only one device is supported in 'to' address for this push request"
     INVALID_ATTACHMENT_DATA = "Invalid attachment data - attachments must be a list of objects with each object containing exactly two properties - 'url' and 'filename'"
+    INVALID_CHANNELS = "Invalid channels provided for this event. Please provide a subset of allowed channels"

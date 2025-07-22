@@ -13,6 +13,7 @@ from app.utilities import generate_uuid
 from app.utilities.pubsub import SQSWrapper
 from app.utilities.http import RestApiClientWrapper
 from app.utilities.validators import validate_email, validate_mobile
+from app.utilities.parser import V2PayloadParser
 
 logger = logging.getLogger()
 
@@ -55,13 +56,7 @@ class EventNotification:
     def _validate_notification_request(event: Event, payload: dict):
         to_addresses = payload.get('to') or dict()
         email_addresses = to_addresses.get('email') or list()
-        mobile_numbers = to_addresses.get('mobile') or dict()
-        # devices = to_addresses.get('device') or list()
-
-        if len(email_addresses) > 1:
-            raise BadRequestException(ErrorMessages.ONLY_ONE_TO_EMAIL_SUPPORTED.value)
-        if len(mobile_numbers) > 1:
-            raise BadRequestException(ErrorMessages.ONLY_ONE_TO_MOBILE_SUPPORTED.value)
+        mobile_numbers = to_addresses.get('mobile') or list()
 
         for email in email_addresses:
             if not validate_email(email):
@@ -73,7 +68,6 @@ class EventNotification:
 
         if not event.any_channel_active():
             raise BadRequestException(ErrorMessages.NO_CHANNEL_ACTIVE.value)
-
         # Validate attachments - it must be a list of dicts
         if payload.get("attachments"):
             attachments = payload["attachments"]
@@ -83,15 +77,32 @@ class EventNotification:
                 if not isinstance(attachment, dict) or 'url' not in attachment or 'filename' not in attachment:
                     raise BadRequestException(ErrorMessages.INVALID_ATTACHMENT_DATA.value)
 
+        if event.dynamic_channel_allowed:
+            allowed_channels = payload.get("channels")
+            # if no channels are provided, at least one channel should be active
+            if allowed_channels == []:
+                raise BadRequestException(ErrorMessages.NO_CHANNEL_ACTIVE.value)
+            # if channels are provided, they should be subset of allowed channels
+            if allowed_channels:
+                if not set(allowed_channels).issubset(event.get_active_channels()):
+                    raise BadRequestException(ErrorMessages.INVALID_CHANNELS.value)
+            
         # TODO - Need to put validation around verifying the input devices
 
     @classmethod
     async def trigger_event_notification(cls, payload: dict):
-        event_id = str(payload['event_id'])
-        event = await Notifications.get_event(event_id)
+        event_id = str(payload.get("event_id", ""))
+        app_name = payload.get("app_name", "")
+        event_name = payload.get("event_name", "")
+        
+        if not event_id:
+            event = await Notifications.get_event(app_name, event_name)
+        else:
+            event = await Notifications.get_event_by_id(event_id)
         if not event:
             raise BadRequestException(ErrorMessages.EVENT_NOT_CONFIGURED.value)
-
+        
+        payload = V2PayloadParser.parse(payload)
         cls._validate_notification_request(event, payload)
 
         to_addresses = payload.get('to') or dict()
@@ -119,7 +130,7 @@ class EventNotification:
             "attachments": payload.get("attachments") or list(),
             "body": payload.get("body") or dict()
         }
-        result = await cls.accept_notification_request(event, final_payload)
+        result = await cls.accept_notification_request(event, final_payload)        
         return {
             "request_id": request_id, 
             "processing_type": result.processing_type, 
