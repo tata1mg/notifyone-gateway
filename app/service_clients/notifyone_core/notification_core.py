@@ -34,3 +34,9 @@ class NotifyOneCoreClient(APIClient):
         path = '/notifications/{notification_request_id}'.format(notification_request_id=notification_request_id)
         result = await cls.get(path)
         return result.data
+    
+    @classmethod
+    async def handle_email_template_update(cls, data):
+        path = '/events/handle-email-template-update'
+        result = await cls.post(path, data=data)
+        return result.data
