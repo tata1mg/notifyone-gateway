@@ -11,15 +11,40 @@ from app.utilities.rate_limiter import RateLimiter, REDIS_KEY_PREFIX
 # Helpers
 # ---------------------------------------------------------------------------
 
-def make_redis_mock(incr_side_effect=None, incr_return_value=1):
-    """Return a mock that looks like an aioredis.Redis client."""
-    redis = MagicMock()
-    if incr_side_effect is not None:
-        redis.incr = AsyncMock(side_effect=incr_side_effect)
+def make_pipeline_mock(incr_return_value=1, expire_return_value=True,
+                       execute_side_effect=None):
+    """Return a mock aioredis pipeline (async context manager)."""
+    pipe = MagicMock()
+    pipe.incr = MagicMock(return_value=None)   # queues the command
+    pipe.expire = MagicMock(return_value=None)  # queues the command
+    if execute_side_effect is not None:
+        pipe.execute = AsyncMock(side_effect=execute_side_effect)
     else:
-        redis.incr = AsyncMock(return_value=incr_return_value)
-    redis.expire = AsyncMock(return_value=True)
-    return redis
+        pipe.execute = AsyncMock(return_value=(incr_return_value, expire_return_value))
+    return pipe
+
+
+def make_redis_mock(incr_return_value=1, expire_return_value=True,
+                    pipeline_side_effect=None, execute_side_effect=None):
+    """Return a mock that looks like an aioredis.Redis client with pipeline support."""
+    redis = MagicMock()
+    pipe = make_pipeline_mock(
+        incr_return_value=incr_return_value,
+        expire_return_value=expire_return_value,
+        execute_side_effect=execute_side_effect,
+    )
+
+    # pipeline() is used as `async with redis.pipeline(transaction=True) as pipe`
+    ctx_manager = MagicMock()
+    ctx_manager.__aenter__ = AsyncMock(return_value=pipe)
+    ctx_manager.__aexit__ = AsyncMock(return_value=False)
+
+    if pipeline_side_effect is not None:
+        redis.pipeline = MagicMock(side_effect=pipeline_side_effect)
+    else:
+        redis.pipeline = MagicMock(return_value=ctx_manager)
+
+    return redis, pipe
 
 
 def make_limiter(redis_mock, max_requests=100, window_seconds=60):
@@ -39,6 +64,17 @@ class TestBuildKey:
         key = RateLimiter.build_key('order-PO12345')
         assert 'order-PO12345' in key
 
+    def test_key_caps_identifier_at_256_chars(self):
+        long_id = 'x' * 300
+        key = RateLimiter.build_key(long_id)
+        suffix = key[len(REDIS_KEY_PREFIX) + 1:]  # strip prefix and colon
+        assert len(suffix) == 256
+
+    def test_key_with_short_identifier_not_truncated(self):
+        short_id = 'abc'
+        key = RateLimiter.build_key(short_id)
+        assert key.endswith(':abc')
+
 
 # ---------------------------------------------------------------------------
 # check_rate_limit — happy path
@@ -47,42 +83,66 @@ class TestBuildKey:
 class TestCheckRateLimitHappyPath:
     @pytest.mark.asyncio
     async def test_first_request_allowed(self):
-        redis = make_redis_mock(incr_return_value=1)
+        redis, pipe = make_redis_mock(incr_return_value=1)
         limiter = make_limiter(redis)
         result = await limiter.check_rate_limit('user1')
         assert result is True
 
     @pytest.mark.asyncio
-    async def test_first_request_sets_expire(self):
-        redis = make_redis_mock(incr_return_value=1)
+    async def test_first_request_calls_expire_via_pipeline(self):
+        """EXPIRE is enqueued in the pipeline on the very first request."""
+        redis, pipe = make_redis_mock(incr_return_value=1)
         limiter = make_limiter(redis, window_seconds=60)
         await limiter.check_rate_limit('user1')
-        redis.expire.assert_awaited_once_with(
-            RateLimiter.build_key('user1'), 60
-        )
+        pipe.expire.assert_called_once_with(RateLimiter.build_key('user1'), 60)
 
     @pytest.mark.asyncio
-    async def test_subsequent_request_does_not_reset_expire(self):
-        redis = make_redis_mock(incr_return_value=2)
+    async def test_expire_also_called_when_counter_greater_than_one(self):
+        """
+        EXPIRE must be called on every request — not just when count==1.
+        This prevents immortal keys if an earlier EXPIRE failed.
+        """
+        redis, pipe = make_redis_mock(incr_return_value=2)
         limiter = make_limiter(redis)
         await limiter.check_rate_limit('user1')
-        redis.expire.assert_not_awaited()
+        pipe.expire.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_expire_called_when_counter_at_limit(self):
+        """EXPIRE is called even when the counter equals max_requests."""
+        redis, pipe = make_redis_mock(incr_return_value=100)
+        limiter = make_limiter(redis, max_requests=100)
+        await limiter.check_rate_limit('user1')
+        pipe.expire.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_expire_called_when_counter_over_limit(self):
+        """EXPIRE is called even when the counter exceeds max_requests."""
+        redis, pipe = make_redis_mock(incr_return_value=101)
+        limiter = make_limiter(redis, max_requests=100)
+        await limiter.check_rate_limit('user1')
+        pipe.expire.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_request_at_exact_limit_allowed(self):
-        redis = make_redis_mock(incr_return_value=100)
+        redis, pipe = make_redis_mock(incr_return_value=100)
         limiter = make_limiter(redis, max_requests=100)
         result = await limiter.check_rate_limit('user1')
         assert result is True
 
     @pytest.mark.asyncio
     async def test_request_uses_correct_redis_key(self):
-        redis = make_redis_mock(incr_return_value=1)
+        redis, pipe = make_redis_mock(incr_return_value=1)
         limiter = make_limiter(redis)
         await limiter.check_rate_limit('my_identifier')
-        redis.incr.assert_awaited_once_with(
-            'rate_limit:send_notification:my_identifier'
-        )
+        pipe.incr.assert_called_once_with('rate_limit:send_notification:my_identifier')
+
+    @pytest.mark.asyncio
+    async def test_pipeline_called_with_transaction_true(self):
+        redis, pipe = make_redis_mock(incr_return_value=1)
+        limiter = make_limiter(redis)
+        await limiter.check_rate_limit('user1')
+        redis.pipeline.assert_called_once_with(transaction=True)
 
 
 # ---------------------------------------------------------------------------
@@ -92,14 +152,14 @@ class TestCheckRateLimitHappyPath:
 class TestCheckRateLimitExceeded:
     @pytest.mark.asyncio
     async def test_request_over_limit_rejected(self):
-        redis = make_redis_mock(incr_return_value=101)
+        redis, pipe = make_redis_mock(incr_return_value=101)
         limiter = make_limiter(redis, max_requests=100)
         result = await limiter.check_rate_limit('user1')
         assert result is False
 
     @pytest.mark.asyncio
     async def test_far_over_limit_rejected(self):
-        redis = make_redis_mock(incr_return_value=999)
+        redis, pipe = make_redis_mock(incr_return_value=999)
         limiter = make_limiter(redis, max_requests=100)
         result = await limiter.check_rate_limit('user1')
         assert result is False
@@ -107,8 +167,8 @@ class TestCheckRateLimitExceeded:
     @pytest.mark.asyncio
     async def test_limit_is_per_identifier(self):
         """Different identifiers have independent counters (each starts fresh)."""
-        redis_a = make_redis_mock(incr_return_value=101)
-        redis_b = make_redis_mock(incr_return_value=1)
+        redis_a, _ = make_redis_mock(incr_return_value=101)
+        redis_b, _ = make_redis_mock(incr_return_value=1)
         limiter_a = make_limiter(redis_a, max_requests=100)
         limiter_b = make_limiter(redis_b, max_requests=100)
         assert await limiter_a.check_rate_limit('user_a') is False
@@ -122,21 +182,35 @@ class TestCheckRateLimitExceeded:
 class TestCheckRateLimitFailOpen:
     @pytest.mark.asyncio
     async def test_connection_error_allows_request(self):
-        redis = make_redis_mock(incr_side_effect=ConnectionError('refused'))
+        redis, pipe = make_redis_mock(
+            execute_side_effect=ConnectionError('refused')
+        )
         limiter = make_limiter(redis)
         result = await limiter.check_rate_limit('user1')
         assert result is True
 
     @pytest.mark.asyncio
     async def test_timeout_error_allows_request(self):
-        redis = make_redis_mock(incr_side_effect=TimeoutError('timeout'))
+        redis, pipe = make_redis_mock(
+            execute_side_effect=TimeoutError('timeout')
+        )
         limiter = make_limiter(redis)
         result = await limiter.check_rate_limit('user1')
         assert result is True
 
     @pytest.mark.asyncio
     async def test_generic_exception_allows_request(self):
-        redis = make_redis_mock(incr_side_effect=Exception('unexpected'))
+        redis, pipe = make_redis_mock(
+            execute_side_effect=Exception('unexpected')
+        )
+        limiter = make_limiter(redis)
+        result = await limiter.check_rate_limit('user1')
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_pipeline_creation_error_allows_request(self):
+        """If pipeline() itself raises, request must be allowed through."""
+        redis, _ = make_redis_mock(pipeline_side_effect=Exception('pipeline broken'))
         limiter = make_limiter(redis)
         result = await limiter.check_rate_limit('user1')
         assert result is True
@@ -144,7 +218,9 @@ class TestCheckRateLimitFailOpen:
     @pytest.mark.asyncio
     async def test_redis_error_logs_warning(self, caplog):
         import logging
-        redis = make_redis_mock(incr_side_effect=ConnectionError('down'))
+        redis, pipe = make_redis_mock(
+            execute_side_effect=ConnectionError('down')
+        )
         limiter = make_limiter(redis)
         with caplog.at_level(logging.WARNING):
             await limiter.check_rate_limit('user_x')
@@ -157,7 +233,7 @@ class TestCheckRateLimitFailOpen:
 
 class TestInitialize:
     def test_initialize_stores_instance(self):
-        redis = make_redis_mock()
+        redis, _ = make_redis_mock()
         instance = RateLimiter.initialize(redis, 50, 30)
         assert RateLimiter.get_instance() is instance
 
@@ -166,11 +242,11 @@ class TestInitialize:
         assert RateLimiter.get_instance() is None
 
     def test_initialize_sets_max_requests(self):
-        redis = make_redis_mock()
+        redis, _ = make_redis_mock()
         instance = RateLimiter.initialize(redis, 42, 60)
         assert instance._max_requests == 42
 
     def test_initialize_sets_window(self):
-        redis = make_redis_mock()
+        redis, _ = make_redis_mock()
         instance = RateLimiter.initialize(redis, 100, 120)
         assert instance._window_seconds == 120

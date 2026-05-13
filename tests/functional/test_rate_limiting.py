@@ -28,9 +28,18 @@ def _make_request(source_identifier: str):
 
 
 def _make_limiter(counter_value: int, max_requests: int = 100):
+    """Build a RateLimiter whose Redis pipeline returns the given counter value."""
+    pipe = MagicMock()
+    pipe.incr = MagicMock(return_value=None)
+    pipe.expire = MagicMock(return_value=None)
+    pipe.execute = AsyncMock(return_value=(counter_value, True))
+
+    ctx_manager = MagicMock()
+    ctx_manager.__aenter__ = AsyncMock(return_value=pipe)
+    ctx_manager.__aexit__ = AsyncMock(return_value=False)
+
     redis = MagicMock()
-    redis.incr = AsyncMock(return_value=counter_value)
-    redis.expire = AsyncMock(return_value=True)
+    redis.pipeline = MagicMock(return_value=ctx_manager)
     return RateLimiter(redis, max_requests=max_requests, window_seconds=60)
 
 
@@ -94,10 +103,18 @@ class TestRateLimitingDecorator:
 
     @pytest.mark.asyncio
     async def test_redis_unavailable_fails_open(self):
-        """Any Redis exception must allow the request through."""
+        """Any Redis pipeline exception must allow the request through."""
+        pipe = MagicMock()
+        pipe.incr = MagicMock(return_value=None)
+        pipe.expire = MagicMock(return_value=None)
+        pipe.execute = AsyncMock(side_effect=ConnectionError('Redis down'))
+
+        ctx_manager = MagicMock()
+        ctx_manager.__aenter__ = AsyncMock(return_value=pipe)
+        ctx_manager.__aexit__ = AsyncMock(return_value=False)
+
         redis = MagicMock()
-        redis.incr = AsyncMock(side_effect=ConnectionError('Redis down'))
-        redis.expire = AsyncMock()
+        redis.pipeline = MagicMock(return_value=ctx_manager)
         limiter = RateLimiter(redis, max_requests=100, window_seconds=60)
 
         with patch.object(RateLimiter, 'get_instance', return_value=limiter):

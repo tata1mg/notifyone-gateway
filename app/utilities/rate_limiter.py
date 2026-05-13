@@ -34,20 +34,25 @@ class RateLimiter:
 
     @staticmethod
     def build_key(identifier: str) -> str:
+        identifier = identifier[:256]
         return '{}:{}'.format(REDIS_KEY_PREFIX, identifier)
 
     async def check_rate_limit(self, identifier: str) -> bool:
         """
         Returns True if the request is within the rate limit, False if exceeded.
 
+        Uses an atomic Redis pipeline (MULTI/EXEC) to INCR and EXPIRE together,
+        guaranteeing the key always has a TTL. EXPIRE is called on every request
+        so the key is never left without a TTL even if an earlier EXPIRE failed.
+
         On any Redis error, logs a warning and returns True (fail-open).
         """
         key = self.build_key(identifier)
         try:
-            count = await self._redis.incr(key)
-            if count == 1:
-                # First request in this window — set the TTL
-                await self._redis.expire(key, self._window_seconds)
+            async with self._redis.pipeline(transaction=True) as pipe:
+                pipe.incr(key)
+                pipe.expire(key, self._window_seconds)
+                count, _ = await pipe.execute()
             return count <= self._max_requests
         except Exception as exc:
             logger.warning(
