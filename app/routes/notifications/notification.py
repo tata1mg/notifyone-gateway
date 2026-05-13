@@ -9,6 +9,7 @@ from torpedo.exceptions import BadRequestException
 from app.services import EventNotification, Notifications
 from app.routes.notifications.api_model import GetNotificationApiModel, SendNotificationApiModel
 from app.constants import ErrorMessages
+from app.middlewares.rate_limiter_middleware import rate_limit_send_notification
 
 event_notification_blueprint = Blueprint("event_notification")
 
@@ -28,6 +29,7 @@ logger = logging.getLogger()
         SendNotificationApiModel.response_content_type(): SendNotificationApiModel.ResponseBodyOpenApiModel
     },
 )
+@rate_limit_send_notification
 async def send_event_notification(request: Request):
     """
     Endpoint to trigger event based notifications

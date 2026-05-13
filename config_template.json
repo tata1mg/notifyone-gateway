@@ -41,5 +41,14 @@
   },
   "SENTRY": {
     "DSN": ""
+  },
+  "RATE_LIMITING": {
+    "REDIS_HOST": "localhost",
+    "REDIS_PORT": 6379,
+    "REDIS_DB": 0,
+    "ENABLED": true,
+    "MAX_REQUESTS_PER_MINUTE": 100,
+    "WINDOW_SECONDS": 60,
+    "CONNECTION_TIMEOUT": 2
   }
 }
