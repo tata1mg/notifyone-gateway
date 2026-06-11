@@ -47,7 +47,7 @@ def sanic_client(loop):
 
 
 @pytest.fixture(scope="session")
-async def app():
+def app():
     """
     Create an app for tests
     This app works as a dummy app used to mock the outbound http calls (be it inter-service calls or calls to 3rd party applications)
