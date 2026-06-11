@@ -1,0 +1,19 @@
+[project]
+name = "notifyone-gateway"
+version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = [
+    "aiokafka==0.10.0",
+    "torpedo",
+    "commonutils",
+]
+
+[project.optional-dependencies]
+dev = [
+    "moto[server]==5.0.9",
+    "pytest==6.2.5",
+]
+
+[tool.uv.sources]
+torpedo = { git = "https://github.com/tata1mg/torpedo.git", tag = "1.0.0" }
+commonutils = { git = "https://github.com/tata1mg/commonutils.git", tag = "1.0.0" }

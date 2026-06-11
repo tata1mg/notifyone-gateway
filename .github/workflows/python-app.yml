@@ -23,16 +23,18 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.9"
-        cache: 'pipenv'
-    - name: Install dependencies
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+    - name: Check lockfile consistency
       run: |
-        pip install pipenv==2023.12.1
-        pipenv install -d
-        pip freeze
+        uv lock --check
     - name: Setup config file
       run: |
         cp config_template.json config.json
+    - name: Install dependencies
+      run: |
+        uv sync --frozen
     - name: Test with pytest
       run: |
-        pipenv run pytest --cov=app
-        pipenv run coverage report --fail-under=90
+        uv run pytest --cov=app
+        uv run coverage report --fail-under=90
