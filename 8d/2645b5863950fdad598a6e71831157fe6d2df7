@@ -1,0 +1,19 @@
+conftest.py
+  s_2d1432d0b17077::t_9e947584d4e631 50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8d2645b5863950fdad598a6e71831157fe6d2df7",
+  "prompts": {},
+  "sessions": {
+    "s_2d1432d0b17077": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f5eacc05-337b-4a1b-8ce6-78a56574fb97",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Prashant Mishra <prashantmishra@L9KXW927K6local-781.local>"
+    }
+  }
+}
