@@ -6,6 +6,7 @@ import asyncio
 import dataclasses
 import enum
 import importlib.util
+import os
 import json
 import sys
 import types
@@ -99,7 +100,7 @@ _ensure_stub("app.utilities.utils", json_dumps=json.dumps)
 _ensure_stub("app.utilities.pubsub")
 
 # Load the kafka_wrapper module directly from its file path
-_GATEWAY_ROOT = "/opt/1mg/open_source/notifyone/notifyone-gateway"
+_GATEWAY_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if _GATEWAY_ROOT not in sys.path:
     sys.path.insert(0, _GATEWAY_ROOT)
 
