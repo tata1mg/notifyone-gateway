@@ -1,0 +1,27 @@
+.github/workflows/python-app.yml
+  s_a0b4872f270ab7::t_e02eca70980ff7 26-28,30,34-36,39-40
+.gitignore
+  s_a0b4872f270ab7::t_5732de1e53cdc9 129
+README.md
+  s_a0b4872f270ab7::t_98d6e49a21ab93 49-51
+Dockerfile
+  s_a0b4872f270ab7::t_5b81fc68f98f30 28,37-38,50
+pyproject.toml
+  s_a0b4872f270ab7::t_a4d388539380d1 1-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8292346679eaea7d985d4af9b534cc177e2de1c2",
+  "prompts": {},
+  "sessions": {
+    "s_a0b4872f270ab7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f47c94d7-228e-4328-973e-84779edc5af6",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Prashant Mishra <prashantmishra@L9KXW927K6local-781.local>"
+    }
+  }
+}
