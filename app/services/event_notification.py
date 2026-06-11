@@ -10,7 +10,7 @@ from .publisher import Publisher
 from app.constants import ErrorMessages, EventPriority, PrepareNotification
 from app.models import Event
 from app.utilities import generate_uuid
-from app.utilities.pubsub import SQSWrapper
+from app.utilities.pubsub import get_publisher
 from app.utilities.http import RestApiClientWrapper
 from app.utilities.validators import validate_email, validate_mobile
 
@@ -31,15 +31,15 @@ class EventNotification:
             endpoint=PrepareNotification.ENDPOINT,
             method=PrepareNotification.METHOD,
         )
-        high_priority_handler = SQSWrapper(
+        high_priority_handler = get_publisher(
             notification_config["HIGH_PRIORITY"]["QUEUE_NAME"],
             config=notification_config,
         )
-        medium_priority_handler = SQSWrapper(
+        medium_priority_handler = get_publisher(
             notification_config["MEDIUM_PRIORITY"]["QUEUE_NAME"],
             config=notification_config,
         )
-        low_priority_handler = SQSWrapper(
+        low_priority_handler = get_publisher(
             notification_config["LOW_PRIORITY"]["QUEUE_NAME"],
             config=notification_config,
         )

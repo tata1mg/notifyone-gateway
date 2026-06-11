@@ -19,6 +19,11 @@
     "TRANSACTION_SAMPLE_RATE": 0.1
   },
   "TRIGGER_NOTIFICATIONS": {
+    "QUEUE_BACKEND": "sqs",
+    "KAFKA": {
+      "BOOTSTRAP_SERVERS": "localhost:9092",
+      "MAX_RETRY_ATTEMPTS": 3
+    },
     "SQS": {
       "SQS_REGION": "eu-west-2",
       "SQS_MAX_CONNECTIONS": 20,
