@@ -1,0 +1,37 @@
+app/utilities/pubsub/__init__.py
+  s_2d1432d0b17077::t_b88c07e2010843 1,4-12
+Pipfile
+  s_2d1432d0b17077::t_70f42950365c94 9
+tests/unit/test_kafka_wrapper.py
+  s_2d1432d0b17077::t_04401821c539af 8,34,47,52-53,55,61,66,74,86,90,95-96,101-108,110-113,138,154,169,179-183,190
+  s_2d1432d0b17077::t_a1a80e53dc918d 1-4,6-7,11,17-20,45,48,100,114-119,131-134,143,159,174,189,194
+  s_2d1432d0b17077::t_9901098a68e3d5 16,21-33,35-44,46,49-51,54,56-60,62-65,67-73,75-85,87-89,91-94,97-99,109
+  s_2d1432d0b17077::t_753f3b5c5af21f 5,9-10,12-15,120-130,135-137,139-142,144-153,155-158,160-168,170-173,175-178,184-188,191-193,195-200
+app/utilities/pubsub/kafka/__init__.py
+  s_2d1432d0b17077::t_6310c333f8b05a 1
+app/services/event_notification.py
+  s_2d1432d0b17077::t_4b617281b614e9 13
+  s_2d1432d0b17077::t_5af07699404e5d 34,38,42
+tests/unit/conftest.py
+  s_2d1432d0b17077::t_006bc20d867124 1-39
+app/utilities/pubsub/kafka/kafka_wrapper.py
+  s_2d1432d0b17077::t_daf054448aacfa 1-89
+config_template.json
+  s_2d1432d0b17077::t_5141486551464f 22-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a0eb7ec7ed350953826348f07d107068467e1e47",
+  "prompts": {},
+  "sessions": {
+    "s_2d1432d0b17077": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f5eacc05-337b-4a1b-8ce6-78a56574fb97",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Prashant Mishra <prashantmishra@L9KXW927K6local-781.local>"
+    }
+  }
+}
