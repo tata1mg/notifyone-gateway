@@ -33,7 +33,7 @@ jobs:
         cp config_template.json config.json
     - name: Install dependencies
       run: |
-        uv sync --frozen
+        uv sync --frozen --extra dev
     - name: Test with pytest
       run: |
         uv run pytest --cov=app
