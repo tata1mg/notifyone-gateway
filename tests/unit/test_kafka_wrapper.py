@@ -3,6 +3,7 @@ Unit tests for gateway KafkaWrapper.
 Stubs out commonutils/torpedo/sanic so this runs without the full pipenv install.
 """
 import asyncio
+import functools
 import dataclasses
 import enum
 import importlib.util
@@ -13,6 +14,29 @@ import types
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+
+def run_async(coro_func):
+    """Run an async test on a private event loop, leaving the ambient loop untouched.
+
+    Keeps these tests independent of pytest-sanic / pytest-asyncio loop management
+    so they cannot interfere with the session-scoped fixtures of other tests.
+    """
+    @functools.wraps(coro_func)
+    def wrapper(*args, **kwargs):
+        try:
+            prev_loop = asyncio.get_event_loop()
+        except RuntimeError:
+            prev_loop = None
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(coro_func(*args, **kwargs))
+        finally:
+            loop.close()
+            asyncio.set_event_loop(prev_loop)
+    return wrapper
+
 
 
 # ---------------------------------------------------------------------------
@@ -133,7 +157,7 @@ def kafka_config():
 # Tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
+@run_async
 async def test_publish_success(kafka_config):
     """publish() returns PublishResult(is_success=True) on producer.send_and_wait success."""
     with patch.object(_kafka_wrapper_mod, "AIOKafkaProducer") as MockProducer:
@@ -149,7 +173,7 @@ async def test_publish_success(kafka_config):
     mock_producer.send_and_wait.assert_called_once()
 
 
-@pytest.mark.asyncio
+@run_async
 async def test_publish_failure(kafka_config):
     """publish() returns is_success=False on producer exception."""
     with patch.object(_kafka_wrapper_mod, "AIOKafkaProducer") as MockProducer:
@@ -164,7 +188,7 @@ async def test_publish_failure(kafka_config):
     assert "broker unavailable" in result.message
 
 
-@pytest.mark.asyncio
+@run_async
 async def test_large_payload_triggers_compression(kafka_config):
     """A payload larger than 250KB triggers compression and adds compressedMessage header."""
     with patch.object(_kafka_wrapper_mod, "AIOKafkaProducer") as MockProducer:
@@ -185,7 +209,7 @@ async def test_large_payload_triggers_compression(kafka_config):
     assert header_dict.get("compressedMessage") == b"yes"
 
 
-@pytest.mark.asyncio
+@run_async
 async def test_init_is_idempotent(kafka_config):
     """init() is idempotent: producer.start() called only once on repeated init() calls."""
     with patch.object(_kafka_wrapper_mod, "AIOKafkaProducer") as MockProducer:
